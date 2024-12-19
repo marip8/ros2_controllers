@@ -217,11 +217,11 @@ controller_interface::return_type AdmittanceRule::update(
   for (size_t i = 0; i < num_joints_; ++i)
   {
     desired_joint_state.positions[i] =
-      reference_joint_state.positions[i] + admittance_state_.joint_pos[i];
+      current_joint_state.positions[i] + admittance_state_.joint_pos[i];
     desired_joint_state.velocities[i] =
-      reference_joint_state.velocities[i] + admittance_state_.joint_vel[i];
+      current_joint_state.velocities[i] + admittance_state_.joint_vel[i];
     desired_joint_state.accelerations[i] =
-      reference_joint_state.accelerations[i] + admittance_state_.joint_acc[i];
+      current_joint_state.accelerations[i] + admittance_state_.joint_acc[i];
   }
 
   return controller_interface::return_type::OK;
@@ -299,8 +299,8 @@ bool AdmittanceRule::calculate_admittance_rule(AdmittanceState & admittance_stat
   }
 
   // integrate motion in joint space
-  admittance_state.joint_vel += (admittance_state.joint_acc) * dt;
-  admittance_state.joint_pos += admittance_state.joint_vel * dt;
+  admittance_state.joint_vel = admittance_state.joint_acc * dt;
+  admittance_state.joint_pos = admittance_state.joint_vel * dt;
 
   // calculate admittance velocity corresponding to joint velocity ("base_link" frame)
   success &= kinematics_->convert_joint_deltas_to_cartesian_deltas(
